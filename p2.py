@@ -11,14 +11,14 @@ import streamlit as st
 import pickle
 
 data = {
-    '2017': pd.read_excel('C:/Users/Pc/Documents/Project 2/mancanegara_2017.xlsx'),
-    '2018': pd.read_excel('C:/Users/Pc/Documents/Project 2/mancanegara_2018.xlsx'),
-    '2019': pd.read_excel('C:/Users/Pc/Documents/Project 2/mancanegara_2019.xlsx'),
-    '2020': pd.read_excel('C:/Users/Pc/Documents/Project 2/mancanegara_2020.xlsx'),
-    '2021': pd.read_excel('C:/Users/Pc/Documents/Project 2/mancanegara_2021.xlsx'),
-    '2022': pd.read_excel('C:/Users/Pc/Documents/Project 2/mancanegara_2022.xlsx'),
-    '2023': pd.read_excel('C:/Users/Pc/Documents/Project 2/mancanegara_2023.xlsx'),
-    '2024': pd.read_excel('C:/Users/Pc/Documents/Project 2/mancanegara_2024.xlsx'),
+    '2017': pd.read_excel('mancanegara_2017.xlsx'),
+    '2018': pd.read_excel('mancanegara_2018.xlsx'),
+    '2019': pd.read_excel('mancanegara_2019.xlsx'),
+    '2020': pd.read_excel('mancanegara_2020.xlsx'),
+    '2021': pd.read_excel('mancanegara_2021.xlsx'),
+    '2022': pd.read_excel('mancanegara_2022.xlsx'),
+    '2023': pd.read_excel('mancanegara_2023.xlsx'),
+    '2024': pd.read_excel('mancanegara_2024.xlsx'),
 }
 
 df = pd.concat(data.values(), ignore_index=True)
