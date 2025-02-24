@@ -202,7 +202,7 @@ try:
             fig.add_trace(go.Scatter(x=data['Period'], y=data['Value'], name='Actual Data', line=dict(color='blue')))
             fig.add_trace(go.Scatter(x=future_dates, y=future_values, name='Forecast', line=dict(color='orange')))
             
-            fig.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast',
+            fig.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast Wisman',
                             width=900, title_x=0.5, height=400, xaxis_title='Date',
                             yaxis_title='Wisatawan')
             
@@ -226,7 +226,7 @@ try:
             figd.add_trace(go.Scatter(x=devisa['Period'], y=devisa['Devisa'], name='Actual Data', line=dict(color='blue')))
             figd.add_trace(go.Scatter(x=future_dates, y=future_devisa, name='Forecast', line=dict(color='orange')))
             
-            figd.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast',
+            figd.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast Devisa',
                             width=900, title_x=0.5, height=400, xaxis_title='Date',
                             yaxis_title='Devisa')
             
