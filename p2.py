@@ -39,6 +39,7 @@ df = df.drop(['entrance'], axis=1)
 
 # Group data by year and sum the numerical columns
 df_grouped = df.groupby('year').sum()
+df_grouped = df_grouped[1:]
 
 # with st.container():
 #     st.write("### **Data Wisatawan Mancanegara**")
@@ -67,18 +68,31 @@ new_df = pd.DataFrame(new_data, columns=['Period', 'Value'])
 new_df['Period'] = pd.to_datetime(new_df['Period'], format='%Y-%m')
 new_df = new_df[:-1]
 
+# Data Devisa
+pengeluaran = {'Tahun': [2018, 2019, 2020, 2021, 2022, 2023, 2024], 'Rata-Rata Pengeluaran': [1220.18, 1154.64, 2165.02, 3097.41, 1448.01, 1625.36, 1383.78]}
+pengeluaran_df = pd.DataFrame(pengeluaran)
+merged_df = pd.merge(new_df, pengeluaran_df, left_on=new_df['Period'].dt.year, right_on='Tahun', how='left')
+
+# Multiply 'Value' by 'Rata-Rata Pengeluaran'
+merged_df['Devisa'] = merged_df['Value'] * merged_df['Rata-Rata Pengeluaran']
+merged_df = merged_df[['Period', 'Devisa']]
+
+# Box-Cox
 data = new_df.copy()
 data['Value'] = data['Value'].apply(lambda x: x if x > 0 else 1e-6)
 data['Value_Boxcox'], lam = boxcox(data['Value'])
 
-from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
+# Box-Cox
+devisa = merged_df.copy()
+devisa['Devisa'] = devisa['Devisa'].apply(lambda x: x if x > 0 else 1e-6)
+devisa['Devisa_Boxcox'], lamd = boxcox(devisa['Devisa'])
 
 # Difference the data
 data["Value_diff"] = data["Value_Boxcox"].diff()
 data.dropna(inplace=True)
 
-data['Period'] = pd.to_datetime(data['Period'])
-data['month_num'] = data['Period'].dt.month
+devisa["Devisa_diff"] = devisa["Devisa_Boxcox"].diff()
+devisa.dropna(inplace=True)
 
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
@@ -86,16 +100,29 @@ data['Period'] = pd.to_datetime(data['Period'])
 data['month_num'] = data['Period'].dt.month
 
 # Get fourier features
-for order in range(1, 13):
+for order in range(1, 21):
     data[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * data['month_num'] / 12)
     data[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * data['month_num'] / 12)
 
 # name of fourier features
 fourier_features = [i for i in list(data) if i.startswith('fourier')]
 
-with open('dhr_model.pkl', 'rb') as file:
-    model = pickle.load(file)
+devisa['Period'] = pd.to_datetime(devisa['Period'])
+devisa['month_num'] = devisa['Period'].dt.month
 
+# Get fourier features
+for order in range(1, 21):
+    devisa[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * devisa['month_num'] / 12)
+    devisa[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * devisa['month_num'] / 12)
+
+# name of fourier features
+fourier_features_d = [i for i in list(devisa) if i.startswith('fourier')]
+
+with open('wisman_model.pkl', 'rb') as file:
+    modelw = pickle.load(file)
+
+with open('devisa_model.pkl', 'rb') as file:
+    modeld = pickle.load(file)
 
 def forecast_wisatawan(months):
     future_dates = pd.date_range(start=data['Period'].max(), periods=months + 1, freq='MS')[1:]
@@ -103,15 +130,31 @@ def forecast_wisatawan(months):
     future_data['month_num'] = future_data['Period'].dt.month
     
     # Generate Fourier features
-    for order in range(1, 13):
+    for order in range(1, 25):
         future_data[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * future_data['month_num'] / 12)
         future_data[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * future_data['month_num'] / 12)
     
     # Forecast
-    boxcox_future_forecasts = model.forecast(months, exog=future_data[fourier_features])
+    boxcox_future_forecasts = modelw.forecast(months, exog=future_data[fourier_features])
     future_forecasts = inv_boxcox(boxcox_future_forecasts, lam)
     
     return future_data['Period'], future_forecasts
+
+def forecast_devisa(months):
+    future_dates = pd.date_range(start=devisa['Period'].max(), periods=months + 1, freq='MS')[1:]
+    future_data_d = pd.DataFrame({'Period': future_dates})
+    future_data_d['month_num'] = future_data_d['Period'].dt.month
+    
+    # Generate Fourier features
+    for order in range(1, 25):
+        future_data_d[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * future_data_d['month_num'] / 12)
+        future_data_d[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * future_data_d['month_num'] / 12)
+    
+    # Forecast
+    boxcox_future_forecasts_d = modeld.forecast(months, exog=future_data_d[fourier_features_d])
+    future_forecasts_d = inv_boxcox(boxcox_future_forecasts_d, lamd)
+    
+    return future_data_d['Period'], future_forecasts_d
 
 # Streamlit UI
 st.set_page_config(page_title='Dashboard Wisatawan Mancanegara', page_icon=':airplane:', layout='wide')
@@ -123,7 +166,7 @@ with st.container():
              ''')
     st.write("---")
 
-pilihan = st.selectbox('Menu: ', ['','🗃️View Data', '📈Forecast'])
+pilihan = st.selectbox('Menu: ', ['','🗃️View Tourist Data', '📈Forecast'])
 
 try: 
     if 'View Data' in pilihan:
@@ -142,7 +185,6 @@ try:
             def persentase_selisih(n_awal, n_akhir):
                 return ((n_akhir - n_awal) / n_awal) * 100
 
-            # Contoh penggunaan
             a = new_df['Value'].iloc[-12:].mean()
             b = future_values.mean()
 
@@ -165,6 +207,30 @@ try:
                             yaxis_title='Wisatawan')
             
             st.plotly_chart(fig)
+
+            future_dates, future_devisa = forecast_devisa(months_to_forecast)
+            a = devisa['Devisa'].iloc[-12:].mean()
+            b = future_devisa.mean()
+
+            persentase = persentase_selisih(a, b)
+
+            if persentase > 0:
+                st.write(f'📈Terjadi peningkatan sebesar {persentase:.2f}% dari periode sebelumnya')
+            elif persentase < 0:
+                st.write(f'📉Terjadi penurunan sebesar {persentase:.2f}% dari periode sebelumnya')
+            else:
+                st.write(f'📊Tidak ada peningkatan maupun penurunan dari periode sebelumnya')
+
+            # Plot
+            figd = go.Figure()
+            figd.add_trace(go.Scatter(x=devisa['Period'], y=devisa['Devisa'], name='Actual Data', line=dict(color='blue')))
+            figd.add_trace(go.Scatter(x=future_dates, y=future_devisa, name='Forecast', line=dict(color='orange')))
+            
+            figd.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast',
+                            width=900, title_x=0.5, height=400, xaxis_title='Date',
+                            yaxis_title='Devisa')
+            
+            st.plotly_chart(figd)
             
 
     else:
@@ -172,4 +238,3 @@ try:
 
 except Exception as e:
     st.error(f"Error saat memuat model atau data: {e}")
-
