@@ -188,12 +188,12 @@ try:
             a = new_df['Value'].iloc[-12:].mean()
             b = future_values.mean()
 
-            persentase = persentase_selisih(a, b)
+            persentase_w = persentase_selisih(a, b)
 
-            if persentase > 0:
-                st.write(f'📈Terjadi peningkatan sebesar {persentase:.2f}% dari periode sebelumnya')
-            elif persentase < 0:
-                st.write(f'📉Terjadi penurunan sebesar {persentase:.2f}% dari periode sebelumnya')
+            if persentase_w > 0:
+                st.write(f'📈Terjadi peningkatan sebesar {persentase_w:.2f}% dari periode sebelumnya')
+            elif persentase_w < 0:
+                st.write(f'📉Terjadi penurunan sebesar {persentase_w:.2f}% dari periode sebelumnya')
             else:
                 st.write(f'📊Tidak ada peningkatan maupun penurunan dari periode sebelumnya')
 
@@ -212,12 +212,12 @@ try:
             a = devisa['Devisa'].iloc[-12:].mean()
             b = future_devisa.mean()
 
-            persentase = persentase_selisih(a, b)
+            persentase_d = persentase_selisih(a, b)
 
-            if persentase > 0:
-                st.write(f'📈Terjadi peningkatan sebesar {persentase:.2f}% dari periode sebelumnya')
-            elif persentase < 0:
-                st.write(f'📉Terjadi penurunan sebesar {persentase:.2f}% dari periode sebelumnya')
+            if persentase_d > 0:
+                st.write(f'📈Terjadi peningkatan sebesar {persentase_d:.2f}% dari periode sebelumnya')
+            elif persentase_d < 0:
+                st.write(f'📉Terjadi penurunan sebesar {persentase_d:.2f}% dari periode sebelumnya')
             else:
                 st.write(f'📊Tidak ada peningkatan maupun penurunan dari periode sebelumnya')
 
@@ -231,6 +231,29 @@ try:
                             yaxis_title='Devisa')
             
             st.plotly_chart(figd)
+
+            if persentase_w > 0:
+                if persentase_d > 0:
+                    st.write(f'Terjadi peningkatan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}% dan peningkatan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
+                elif persentase_d < 0:
+                    st.write(f'Terjadi peningkatan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}%, namun terjadi penurunan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
+                else:
+                    st.write(f'Terjadi peningkatan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}%, namun tidak ada peningkatan maupun penurunan devisa dari periode sebelumnya.')
+            elif persentase_w < 0:
+                if persentase_d > 0:
+                    st.write(f'Terjadi penurunan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}%, namun terdapat peningkatan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
+                elif persentase_d < 0:
+                    st.write(f'Terjadi penuurunan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}% dan terjadi penurunan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
+                else:
+                    st.write(f'Terjadi penurunan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}%, namun tidak ada peningkatan maupun penurunan devisa dari periode sebelumnya.')
+            else:
+                if persentase_d > 0:
+                    st.write(f'Tidak ada peningkatan maupun penurunan kunjungan wisatawan mancanegara dari periode sebelumnya, namun terdapat peningkatan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
+                elif persentase_d < 0:
+                    st.write(f'Tidak ada peningkatan maupun penurunan kunjungan wisatawan mancanegara dari periode sebelumnya, namun terjadi penurunan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
+                else:
+                    st.write(f'Tidak ada peningkatan maupun penurunan kunjungan wisatawan mancanegara dan devisa dari periode sebelumnya.')
+
             st.write('''
             Rekomendasi:
             1. Penguatan Destinasi Wisata
