@@ -231,6 +231,12 @@ try:
                             yaxis_title='Devisa')
             
             st.plotly_chart(figd)
+            st.write("""
+            1. Pengembangan destinasi wisata difokuskan pada peningkatan daya saing melalui perbaikan fasilitas, penguatan citra pariwisata, optimalisasi pengelolaan destinasi, serta pemberdayaan masyarakat setempat.
+            2. Strategi pemasaran pariwisata nasional bertujuan untuk memperluas kerja sama internasional di sektor pariwisata dan menarik lebih banyak wisatawan mancanegara.
+            3. Pengembangan industri pariwisata berorientasi pada peningkatan keterlibatan pelaku usaha lokal dalam industri wisata nasional serta penguatan daya saing produk wisata.
+            4. Penguatan kelembagaan pariwisata difokuskan pada pengembangan sumber daya manusia dan organisasi pariwisata.
+            """)
             
 
     else:
