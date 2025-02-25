@@ -232,6 +232,9 @@ try:
             
             st.plotly_chart(figd)
 
+
+            tgl = future_dates.strftime('%B %Y')
+            st.write(f'Hasil prediksi kunjungan wisatawan mancanegara dan devisa pada periode {tgl[0]} hingga {tgl[-1]} adalah sebagai berikut:')
             if persentase_w > 0:
                 if persentase_d > 0:
                     st.write(f'Terjadi peningkatan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}% dan peningkatan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
