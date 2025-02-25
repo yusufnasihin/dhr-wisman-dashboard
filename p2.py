@@ -232,8 +232,9 @@ try:
             
             st.plotly_chart(figd)
 
-
+            future_dates = pd.date_range(start=devisa['Period'].max(), periods=months_to_forecast + 1, freq='MS')[1:]
             tgl = future_dates.strftime('%B %Y')
+            
             st.write(f'Hasil prediksi kunjungan wisatawan mancanegara dan devisa pada periode {tgl[0]} hingga {tgl[-1]} adalah sebagai berikut:')
             if persentase_w > 0:
                 if persentase_d > 0:
