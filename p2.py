@@ -20,7 +20,7 @@ data = {
 }
 
 df = pd.concat(data.values(), ignore_index=True)
-df = df.drop(columns=['type','yearly'], axis=1)
+df = df.drop(columns=['type','yearly'])
 years = []
 for year, df_year in data.items():
     years.extend([year] * len(df_year))
@@ -130,7 +130,7 @@ def forecast_wisatawan(months):
     future_data['month_num'] = future_data['Period'].dt.month
     
     # Generate Fourier features
-    for order in range(1, 25):
+    for order in range(1, 21):
         future_data[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * future_data['month_num'] / 12)
         future_data[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * future_data['month_num'] / 12)
     
