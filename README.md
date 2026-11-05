@@ -78,6 +78,7 @@ Generate predictions for tourism foreign exchange revenue.
 Visualize historical and forecasted values using Plotly charts.
 Calculate percentage increases or decreases compared to the previous 12-month average.
 Provide tourism development recommendations based on forecast results.
+
 📁 Project Structure
 text
 ├── app.py
