@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 import plotly.graph_objects as go
 from scipy.stats import boxcox
 from scipy.special import inv_boxcox
@@ -24,7 +26,7 @@ data = {
 }
 
 df = pd.concat(data.values(), ignore_index=True)
-df = df.drop(columns=['type','yearly'])
+df = df.drop(columns=['type','yearly'], axis=1)
 years = []
 for year, df_year in data.items():
     years.extend([year] * len(df_year))
@@ -55,16 +57,20 @@ months = range(1, 13)
 new_data = []
 
 for year, row in df_grouped.iterrows():
-
     for month in months:
-
         value = row.iloc[month - 1]
-
         new_data.append([f"{year}-{month}", value])
 
-# Create a new DataFrame from the new data
-new_df = pd.DataFrame(new_data, columns=['Period', 'Value'])
-new_df['Period'] = pd.to_datetime(new_df['Period'], format='%Y-%m')
+new_df = pd.DataFrame(
+    new_data,
+    columns=['Period', 'Value']
+)
+
+new_df['Period'] = pd.to_datetime(
+    new_df['Period'],
+    format='%Y-%m'
+)
+
 new_df = new_df[:-1]
 
 # Data Devisa
@@ -145,7 +151,7 @@ def forecast_devisa(months):
     future_data_d['month_num'] = future_data_d['Period'].dt.month
     
     # Generate Fourier features
-    for order in range(1, 25):
+    for order in range(1, 21):
         future_data_d[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * future_data_d['month_num'] / 12)
         future_data_d[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * future_data_d['month_num'] / 12)
     
@@ -165,7 +171,7 @@ with st.container():
              ''')
     st.write("---")
 
-pilihan = st.selectbox('Menu: ', ['','🗃️View Tourist Data', '📈Forecast'])
+pilihan = st.selectbox('Menu: ', ['','🗃️View Data', '📈Forecast'])
 
 try: 
     if 'View Data' in pilihan:
@@ -187,12 +193,12 @@ try:
             a = new_df['Value'].iloc[-12:].mean()
             b = future_values.mean()
 
-            persentase_w = persentase_selisih(a, b)
+            persentase = persentase_selisih(a, b)
 
-            if persentase_w > 0:
-                st.write(f'📈Terjadi peningkatan sebesar {persentase_w:.2f}% dari periode sebelumnya')
-            elif persentase_w < 0:
-                st.write(f'📉Terjadi penurunan sebesar {persentase_w:.2f}% dari periode sebelumnya')
+            if persentase > 0:
+                st.write(f'📈Terjadi peningkatan sebesar {persentase:.2f}% dari periode sebelumnya')
+            elif persentase < 0:
+                st.write(f'📉Terjadi penurunan sebesar {persentase:.2f}% dari periode sebelumnya')
             else:
                 st.write(f'📊Tidak ada peningkatan maupun penurunan dari periode sebelumnya')
 
@@ -201,7 +207,7 @@ try:
             fig.add_trace(go.Scatter(x=data['Period'], y=data['Value'], name='Actual Data', line=dict(color='blue')))
             fig.add_trace(go.Scatter(x=future_dates, y=future_values, name='Forecast', line=dict(color='orange')))
             
-            fig.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast Wisman',
+            fig.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast',
                             width=900, title_x=0.5, height=400, xaxis_title='Date',
                             yaxis_title='Wisatawan')
             
@@ -211,12 +217,12 @@ try:
             a = devisa['Devisa'].iloc[-12:].mean()
             b = future_devisa.mean()
 
-            persentase_d = persentase_selisih(a, b)
+            persentase = persentase_selisih(a, b)
 
-            if persentase_d > 0:
-                st.write(f'📈Terjadi peningkatan sebesar {persentase_d:.2f}% dari periode sebelumnya')
-            elif persentase_d < 0:
-                st.write(f'📉Terjadi penurunan sebesar {persentase_d:.2f}% dari periode sebelumnya')
+            if persentase > 0:
+                st.write(f'📈Terjadi peningkatan sebesar {persentase:.2f}% dari periode sebelumnya')
+            elif persentase < 0:
+                st.write(f'📉Terjadi penurunan sebesar {persentase:.2f}% dari periode sebelumnya')
             else:
                 st.write(f'📊Tidak ada peningkatan maupun penurunan dari periode sebelumnya')
 
@@ -225,56 +231,11 @@ try:
             figd.add_trace(go.Scatter(x=devisa['Period'], y=devisa['Devisa'], name='Actual Data', line=dict(color='blue')))
             figd.add_trace(go.Scatter(x=future_dates, y=future_devisa, name='Forecast', line=dict(color='orange')))
             
-            figd.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast Devisa',
+            figd.update_layout(template="simple_white", font=dict(size=18), title_text='Forecast',
                             width=900, title_x=0.5, height=400, xaxis_title='Date',
                             yaxis_title='Devisa')
             
             st.plotly_chart(figd)
-
-            future_dates = pd.date_range(start=devisa['Period'].max(), periods=months_to_forecast + 1, freq='MS')[1:]
-            tgl = future_dates.strftime('%B %Y')
-            
-            st.write(f'Hasil prediksi kunjungan wisatawan mancanegara dan devisa pada periode {tgl[0]} hingga {tgl[-1]} adalah sebagai berikut:')
-            if persentase_w > 0:
-                if persentase_d > 0:
-                    st.write(f'Terjadi peningkatan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}% dan peningkatan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
-                elif persentase_d < 0:
-                    st.write(f'Terjadi peningkatan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}%, namun terjadi penurunan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
-                else:
-                    st.write(f'Terjadi peningkatan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}%, namun tidak ada peningkatan maupun penurunan devisa dari periode sebelumnya.')
-            elif persentase_w < 0:
-                if persentase_d > 0:
-                    st.write(f'Terjadi penurunan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}%, namun terdapat peningkatan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
-                elif persentase_d < 0:
-                    st.write(f'Terjadi penuurunan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}% dan terjadi penurunan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
-                else:
-                    st.write(f'Terjadi penurunan pada kunjungan wisatawan mancanegara sebesar {persentase_w:.2f}%, namun tidak ada peningkatan maupun penurunan devisa dari periode sebelumnya.')
-            else:
-                if persentase_d > 0:
-                    st.write(f'Tidak ada peningkatan maupun penurunan kunjungan wisatawan mancanegara dari periode sebelumnya, namun terdapat peningkatan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
-                elif persentase_d < 0:
-                    st.write(f'Tidak ada peningkatan maupun penurunan kunjungan wisatawan mancanegara dari periode sebelumnya, namun terjadi penurunan devisa sebesar {persentase_d:.2f}% dari periode sebelumnya.')
-                else:
-                    st.write(f'Tidak ada peningkatan maupun penurunan kunjungan wisatawan mancanegara dan devisa dari periode sebelumnya.')
-
-            st.write('''
-            Rekomendasi:
-            1. Penguatan Destinasi Wisata
-            
-            Meningkatkan daya saing destinasi wisata melalui pengembangan fasilitas, perbaikan citra pariwisata, peningkatan kualitas pengelolaan destinasi, serta pemberdayaan masyarakat lokal.
-            
-            2. Optimalisasi Pemasaran Pariwisata Nasional
-            
-            Memperluas kerja sama internasional dalam sektor pariwisata serta menarik lebih banyak wisatawan mancanegara guna meningkatkan kunjungan dan devisa negara.
-            
-            3. Penguatan Industri Pariwisata
-            
-            Mendorong keterlibatan lebih besar dari pelaku usaha lokal dalam industri pariwisata nasional serta meningkatkan daya saing produk wisata agar lebih menarik dan berkualitas.
-            
-            4. Peningkatan Kapasitas Kelembagaan
-            
-            Mengembangkan sumber daya manusia pariwisata serta memperkuat kelembagaan dan organisasi sektor pariwisata untuk mendukung pertumbuhan industri secara berkelanjutan.
-            ''')
             
 
     else:
@@ -282,3 +243,4 @@ try:
 
 except Exception as e:
     st.error(f"Error saat memuat model atau data: {e}")
+
