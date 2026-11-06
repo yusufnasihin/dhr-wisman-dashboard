@@ -50,22 +50,17 @@ df_grouped = df_grouped[1:]
 #     st.write(df_grouped)
 #     st.write('---')
 
-months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+months = range(1, 13)
 
-# Create an empty list to store the new data
 new_data = []
 
-# Iterate through each row of the DataFrame
-for index, row in df_grouped.iterrows():  # Iterate through the grouped DataFrame (df_grouped)
-    year = index  # The year is now the index of the grouped DataFrame
-    # Iterate through each month
-    for month in months:
-        # Create a new row with period and value
-        # Access the correct column name for the sum of values (e.g., 'Jan')
-        # Instead of row[month], use row[month -1] to access the column value
+for year, row in df_grouped.iterrows():
 
-        # Subtract 1 from the month to adjust for zero-based indexing in pandas
-        new_data.append([f"{year}-{month}", row[month - 1]])
+    for month in months:
+
+        value = row.iloc[month - 1]
+
+        new_data.append([f"{year}-{month}", value])
 
 # Create a new DataFrame from the new data
 new_df = pd.DataFrame(new_data, columns=['Period', 'Value'])
