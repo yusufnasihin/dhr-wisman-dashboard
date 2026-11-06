@@ -149,11 +149,14 @@ def forecast_wisatawan(months):
         future_data[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * future_data['month_num'] / 12)
         future_data[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * future_data['month_num'] / 12)
     
+    # Set Period sebagai index agar terbaca oleh statsmodels
+    future_data.set_index('Period', inplace=True)
+    
     # Forecast
     boxcox_future_forecasts = modelw.forecast(months, exog=future_data[fourier_features])
     future_forecasts = inv_boxcox(boxcox_future_forecasts, lam)
     
-    return future_data['Period'], future_forecasts
+    return future_dates, future_forecasts
 
 def forecast_devisa(months):
     future_dates = pd.date_range(start=devisa['Period'].max(), periods=months + 1, freq='MS')[1:]
@@ -165,11 +168,14 @@ def forecast_devisa(months):
         future_data_d[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * future_data_d['month_num'] / 12)
         future_data_d[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * future_data_d['month_num'] / 12)
     
+    # Set Period sebagai index agar terbaca oleh statsmodels
+    future_data_d.set_index('Period', inplace=True)
+    
     # Forecast
     boxcox_future_forecasts_d = modeld.forecast(months, exog=future_data_d[fourier_features_d])
     future_forecasts_d = inv_boxcox(boxcox_future_forecasts_d, lamd)
     
-    return future_data_d['Period'], future_forecasts_d
+    return future_dates, future_forecasts_d
 
 # Streamlit UI
 st.set_page_config(page_title='Dashboard Wisatawan Mancanegara', page_icon=':airplane:', layout='wide')
