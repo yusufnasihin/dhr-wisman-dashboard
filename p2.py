@@ -149,11 +149,11 @@ def forecast_wisatawan(months):
         future_data[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * future_data['month_num'] / 12)
         future_data[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * future_data['month_num'] / 12)
     
-    # Set Period sebagai index agar terbaca oleh statsmodels
-    future_data.set_index('Period', inplace=True)
+    # Ubah ke NumPy array (.values) untuk menghindari error indeks pandas di statsmodels
+    exog_future = future_data[fourier_features].values
     
     # Forecast
-    boxcox_future_forecasts = modelw.forecast(months, exog=future_data[fourier_features])
+    boxcox_future_forecasts = modelw.forecast(months, exog=exog_future)
     future_forecasts = inv_boxcox(boxcox_future_forecasts, lam)
     
     return future_dates, future_forecasts
@@ -168,11 +168,11 @@ def forecast_devisa(months):
         future_data_d[f'fourier_sin_order_{order}'] = np.sin(2 * np.pi * order * future_data_d['month_num'] / 12)
         future_data_d[f'fourier_cos_order_{order}'] = np.cos(2 * np.pi * order * future_data_d['month_num'] / 12)
     
-    # Set Period sebagai index agar terbaca oleh statsmodels
-    future_data_d.set_index('Period', inplace=True)
+    # Ubah ke NumPy array (.values) untuk menghindari error indeks pandas di statsmodels
+    exog_future_d = future_data_d[fourier_features_d].values
     
     # Forecast
-    boxcox_future_forecasts_d = modeld.forecast(months, exog=future_data_d[fourier_features_d])
+    boxcox_future_forecasts_d = modeld.forecast(months, exog=exog_future_d)
     future_forecasts_d = inv_boxcox(boxcox_future_forecasts_d, lamd)
     
     return future_dates, future_forecasts_d
