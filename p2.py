@@ -26,7 +26,7 @@ data = {
 }
 
 df = pd.concat(data.values(), ignore_index=True)
-df = df.drop(columns=['type','yearly'], axis=1)
+df = df.drop(columns=['type','yearly'])
 years = []
 for year, df_year in data.items():
     years.extend([year] * len(df_year))
