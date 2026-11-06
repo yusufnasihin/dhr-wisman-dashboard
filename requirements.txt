@@ -1,7 +1,9 @@
 streamlit
 pandas
 numpy
+openpyxl
 plotly
 scipy
 statsmodels
-openpyxl
+matplotlib
+seaborn
