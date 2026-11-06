@@ -123,11 +123,21 @@ for order in range(1, 21):
 # name of fourier features
 fourier_features_d = [i for i in list(devisa) if i.startswith('fourier')]
 
-with open(BASE_DIR / 'wisman_model.pkl', 'rb') as file:
-    modelw = pickle.load(file)
+try:
+    with open(BASE_DIR / 'wisman_model.pkl', 'rb') as file:
+        modelw = pickle.load(file)
 
-with open(BASE_DIR / 'devisa_model.pkl', 'rb') as file:
-    modeld = pickle.load(file)
+    st.success("Wisman model loaded successfully")
+
+    with open(BASE_DIR / 'devisa_model.pkl', 'rb') as file:
+        modeld = pickle.load(file)
+
+    st.success("Devisa model loaded successfully")
+
+except Exception as e:
+    st.error(f"Model loading error: {e}")
+    st.exception(e)
+    st.stop()
 
 def forecast_wisatawan(months):
     future_dates = pd.date_range(start=data['Period'].max(), periods=months + 1, freq='MS')[1:]
