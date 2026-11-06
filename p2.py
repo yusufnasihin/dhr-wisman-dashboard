@@ -7,16 +7,20 @@ import warnings
 warnings.filterwarnings('ignore')
 import streamlit as st
 import pickle
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / 'data'
 
 data = {
-    '2017': pd.read_excel('mancanegara_2017.xlsx'),
-    '2018': pd.read_excel('mancanegara_2018.xlsx'),
-    '2019': pd.read_excel('mancanegara_2019.xlsx'),
-    '2020': pd.read_excel('mancanegara_2020.xlsx'),
-    '2021': pd.read_excel('mancanegara_2021.xlsx'),
-    '2022': pd.read_excel('mancanegara_2022.xlsx'),
-    '2023': pd.read_excel('mancanegara_2023.xlsx'),
-    '2024': pd.read_excel('mancanegara_2024.xlsx'),
+    '2017': pd.read_excel(DATA_DIR / 'mancanegara_2017.xlsx'),
+    '2018': pd.read_excel(DATA_DIR / 'mancanegara_2018.xlsx'),
+    '2019': pd.read_excel(DATA_DIR / 'mancanegara_2019.xlsx'),
+    '2020': pd.read_excel(DATA_DIR / 'mancanegara_2020.xlsx'),
+    '2021': pd.read_excel(DATA_DIR / 'mancanegara_2021.xlsx'),
+    '2022': pd.read_excel(DATA_DIR / 'mancanegara_2022.xlsx'),
+    '2023': pd.read_excel(DATA_DIR / 'mancanegara_2023.xlsx'),
+    '2024': pd.read_excel(DATA_DIR / 'mancanegara_2024.xlsx'),
 }
 
 df = pd.concat(data.values(), ignore_index=True)
@@ -118,10 +122,10 @@ for order in range(1, 21):
 # name of fourier features
 fourier_features_d = [i for i in list(devisa) if i.startswith('fourier')]
 
-with open('wisman_model.pkl', 'rb') as file:
+with open(BASE_DIR / 'wisman_model.pkl', 'rb') as file:
     modelw = pickle.load(file)
 
-with open('devisa_model.pkl', 'rb') as file:
+with open(BASE_DIR / 'devisa_model.pkl', 'rb') as file:
     modeld = pickle.load(file)
 
 def forecast_wisatawan(months):
